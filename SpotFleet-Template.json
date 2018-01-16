@@ -371,7 +371,9 @@
           "LaunchSpecifications": [
             {
               "IamInstanceProfile": {
-                "Ref": "Ec2IP"
+                "Arn": {
+                  "Ref": "Ec2IP"
+                }
               },
               "KeyName": {
                 "Ref": "KeyName"
