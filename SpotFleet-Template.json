@@ -103,16 +103,7 @@
     "ec2spot": {
       "Type": "AWS::EC2::SpotFleet",
       "Metadata": {
-        "AWS::Cloudformation::Authentication": {
-          "S3Creds": {
-            "type": "s3",
-            "rolename": "Ec2IamRole",
-            "buckets": [
-              "devopslab-cts/Scripts/*"
-            ]
-          }
-        },
-        "AWS::Cloudformation::Init": {
+        "AWS::CloudFormation::Init": {
           "config": {
             "files": {
               "c:\\cfn\\cfn-hup.conf": {
