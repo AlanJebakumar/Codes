@@ -339,15 +339,7 @@
             "Ref": "SpotPrice"
           },
           "TerminateInstancesWithExpiration": false,
-          "Type": "maintain",
-          "Tags": [
-            {
-              "Key": "Name",
-              "Value": {
-                "Ref": "AWS::StackName"
-              }
-            }
-          ]
+          "Type": "maintain"
         }
       }
     }
