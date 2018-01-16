@@ -279,40 +279,44 @@
       "Properties": {
         "SpotFleetRequestConfigData": {
           "IamFleetRole": "arn:aws:iam::336361235864:role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet",
-          "LaunchSpecifications": {
-            "ImageId": {
-              "Ref": "ImageId"
-            },
-            "InstanceType": {
-              "Ref": "InstanceType"
-            },
-            "UserData": {
-              "Fn::Join": [
-                "",
-                [
-                  "<powershell>\n",
-                  "cfn-init.exe --verbose --stack=",
-                  {
-                    "Ref": "AWS::StackId"
-                  },
-                  " --resource ec2spot",
-                  " --region ",
-                  {
-                    "Ref": "AWS::Region"
-                  },
-                  "\n",
-                  "</powershell>"
-                ]
-              ]
-            },
-            "SecurityGroups": [
-              {
-                "GroupId": {
-                  "Ref": "Ec2SG"
+          "LaunchSpecifications": [
+            {
+              "ImageId": {
+                "Ref": "ImageId"
+              },
+              "InstanceType": {
+                "Ref": "InstanceType"
+              },
+              "UserData": {
+                "Fn::Base64": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "<powershell>\n",
+                      "cfn-init.exe --verbose --stack=",
+                      {
+                        "Ref": "AWS::StackId"
+                      },
+                      " --resource ec2spot",
+                      " --region ",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "\n",
+                      "</powershell>"
+                    ]
+                  ]
                 }
-              }
-            ]
-          },
+              },
+              "SecurityGroups": [
+                {
+                  "GroupId": {
+                    "Ref": "Ec2SG"
+                  }
+                }
+              ]
+            }
+          ],
           "TargetCapacity": 1,
           "AllocationStrategy": "lowestPrice",
           "ExcessCapacityTerminationPolicy": "default",
