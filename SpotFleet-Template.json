@@ -8,7 +8,8 @@
     },
     "ImageId": {
       "Type": "String",
-      "Description": "AMI-ID"
+      "Description": "AMI-ID",
+      "Default": "ami-1c4f1c66"
     },
     "InstanceType": {
       "Type": "String",
