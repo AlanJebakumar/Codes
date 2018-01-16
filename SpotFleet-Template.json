@@ -39,6 +39,93 @@
     }
   },
   "Resources": {
+    "Ec2IP": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "DependsOn": [
+        "Ec2SG"
+      ],
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "Ec2IamRole"
+          }
+        ]
+      }
+    },
+    "Ec2IamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "Ec2FullAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "ec2:Describe*",
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "S3Access",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "s3:*",
+                  "Resource": [
+                    "arn:aws:s3:::devopslab-cts",
+                    "arn:aws:s3:::devopslab-cts/*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "CloudformationDiscovery",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "cloudformation:List*",
+                    "cloudformation:Describe*"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
     "Ec2SG": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
@@ -280,9 +367,12 @@
       },
       "Properties": {
         "SpotFleetRequestConfigData": {
-          "IamFleetRole": "arn:aws:iam::336361235864:role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet",
+          "IamFleetRole": "arn:aws:iam::336361235864:role/aws-ec2-spot-fleet-tagging-role",
           "LaunchSpecifications": [
             {
+              "IamInstanceProfile": {
+                "Ref": "Ec2IP"
+              },
               "KeyName": {
                 "Ref": "KeyName"
               },
@@ -298,6 +388,7 @@
                     "",
                     [
                       "<powershell>\n",
+                      "& tzutil /s \"Eastern Standard Time\"\n",
                       "cfn-init.exe --verbose --stack=",
                       {
                         "Ref": "AWS::StackName"
