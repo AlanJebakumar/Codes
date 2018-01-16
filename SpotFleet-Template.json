@@ -269,6 +269,10 @@
               "1-RenameComputer": {
                 "command": "powershell -file c:\\cfn\\ps\\Rename.ps1"
               },
+              "2 - Reboot Post NameChange": {
+                "command": "shutdown.exe -r -f -t 30 -c \"Rebooting post Name Change\"",
+                "waitAfterCompletion": "forever"
+              },
               "99-SendCSignal": {
                 "command": "powershell -file c:\\cfn\\ps\\cfn-signal.ps1"
               }
