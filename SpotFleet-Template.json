@@ -1,5 +1,11 @@
 {
   "Parameters": {
+    "KeyName": {
+      "Description": "The EC2 Key Pair to allow SSH access to the instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Default": "TestNaren",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
     "ImageId": {
       "Type": "String",
       "Description": "AMI-ID"
@@ -285,6 +291,9 @@
           "IamFleetRole": "arn:aws:iam::336361235864:role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet",
           "LaunchSpecifications": [
             {
+              "KeyName": {
+                "Ref": "KeyName"
+              },
               "ImageId": {
                 "Ref": "ImageId"
               },
