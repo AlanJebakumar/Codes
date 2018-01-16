@@ -1,0 +1,66 @@
+{
+  "Parameters": {
+    "ImageId": {
+      "Type": "String",
+      "Description": "AMI-ID"
+    },
+    "InstanceType": {
+      "Type": "String",
+      "Description": "InstanceType",
+      "AllowedValues": [
+        "t2.micro"
+      ],
+      "Default": "t2.micro"
+    },
+    "SpotPrice": {
+      "Type": "String",
+      "Description": "Max Bidding Price"
+    }
+  },
+  "Resources": {
+    "ec2-spot": {
+      "Type": "AWS::EC2::SpotFleet",
+      "Properties": {
+        "SpotFleetRequestConfigData": {
+          "IamFleetRole": "arn:aws:iam::336361235864:role/aws-service-role/spotfleet.amazonaws.com/AWSServiceRoleForEC2SpotFleet",
+          "LaunchSpecifications": {
+            "ImageId": {
+              "Ref": "ImageId"
+            },
+            "InstanceType": {
+              "Ref": "InstanceType"
+            },
+            "UserData": {
+              "Fn::Join": [
+                "",
+                [
+                  "<powershell>\n",
+                  "cfn-init.exe --verbose --stack=",
+                  {
+                    "Ref": "AWS::StackId"
+                  },
+                  " --resource ec2-spot",
+                  " --region ",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  "\n",
+                  "</powershell>"
+                ]
+              ]
+            }
+          },
+          "TargetCapacity": 1,
+          "AllocationStrategy": "lowestPrice",
+          "ExcessCapacityTerminationPolicy": "",
+          "ReplaceUnhealthyInstances": true,
+          "SpotPrice": {
+            "Ref": "SpotPrice"
+          },
+          "TerminateInstancesWithExpiration": false,
+          "Type": "maintain"
+        }
+      }
+    }
+  }
+}
