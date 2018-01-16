@@ -309,7 +309,7 @@
                       "<powershell>\n",
                       "cfn-init.exe --verbose --stack=",
                       {
-                        "Ref": "AWS::StackId"
+                        "Ref": "AWS::StackName"
                       },
                       " --resource ec2spot",
                       " --region ",
