@@ -427,11 +427,11 @@
                                 {
                                   "Ref": "CurrentDateTime"
                                 },
-                                " -Force Update is set to True\""
+                                " -Force Update is set to True\"\n"
                               ]
                             ]
                           },
-                          "write-output -inputObject \"ForceUpdate is set to False\""
+                          "write-output -inputObject \"ForceUpdate is set to False\"\n"
                         ]
                       },
                       "& tzutil /s \"Eastern Standard Time\"\n",
