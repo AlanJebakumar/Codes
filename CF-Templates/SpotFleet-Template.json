@@ -419,11 +419,18 @@
                       {
                         "Fn::If": [
                           "isForceUpdate",
-                          "write-output -inputObject \"",
                           {
-                            "Ref": "CurrentDateTime"
+                            "Fn::Join": [
+                              "",
+                              [
+                                "write-output -inputObject \"",
+                                {
+                                  "Ref": "CurrentDateTime"
+                                },
+                                " -Force Update is set to True\""
+                              ]
+                            ]
                           },
-                          " -Force Update is set to True\"",
                           "write-output -inputObject \"ForceUpdate is set to False\""
                         ]
                       },
