@@ -11,7 +11,7 @@
     },
     "CurrentDateTime": {
       "Type": "String",
-      "Description": "Enter Current Date Time in \"mm/dd/yyyyTHH:MM\" format to Enable ForceUpdate"
+      "Description": "Enter Current Date Time in \"yyyy-mm-ddTHH:MM\" format to Enable ForceUpdate"
     },
     "KeyName": {
       "Description": "The EC2 Key Pair to allow SSH access to the instances",
@@ -427,7 +427,7 @@
                                 {
                                   "Ref": "CurrentDateTime"
                                 },
-                                " -Force Update is set to True\"\n"
+                                " - ForceUpdate is set to True\"\n"
                               ]
                             ]
                           },
