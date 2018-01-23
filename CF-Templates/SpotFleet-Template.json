@@ -1,5 +1,18 @@
 {
   "Parameters": {
+    "ForceUpdate": {
+      "Type": "String",
+      "Description": "Enable/Disable ForceUpdate",
+      "AllowedValues": [
+        true,
+        false
+      ],
+      "Default": true
+    },
+    "CurrentDateTime": {
+      "Type": "String",
+      "Description": "Enter Current Date Time in \"mm/dd/yyyyTHH:MM\" format to Enable ForceUpdate"
+    },
     "KeyName": {
       "Description": "The EC2 Key Pair to allow SSH access to the instances",
       "Type": "AWS::EC2::KeyPair::KeyName",
@@ -36,6 +49,16 @@
       "Type": "AWS::EC2::VPC::Id",
       "Description": "VpcId of your existing Virtual Private Cloud (VPC)",
       "ConstraintDescription": "must be the VPC Id of an existing Virtual Private Cloud."
+    }
+  },
+  "Conditions": {
+    "isForceUpdate": {
+      "Fn::Equals": [
+        {
+          "Ref": "ForceUpdate"
+        },
+        true
+      ]
     }
   },
   "Resources": {
@@ -393,6 +416,17 @@
                     "",
                     [
                       "<powershell>\n",
+                      {
+                        "Fn::If": [
+                          "isForceUpdate",
+                          "write-output -inputObject \"",
+                          {
+                            "Ref": "CurrentDateTime"
+                          },
+                          " -Force Update is set to True\"",
+                          "write-output -inputObject \"ForceUpdate is set to False\""
+                        ]
+                      },
                       "& tzutil /s \"Eastern Standard Time\"\n",
                       "cfn-init.exe --verbose --stack=",
                       {
