@@ -7,4 +7,10 @@ node{
 			date +%D
 		'''
 	}
+	stage('Test'){
+	    echo 'Testing stage'
+	    sh '''
+	        echo 'Testing stage'
+	    '''
+	}
 }
