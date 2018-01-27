@@ -7,9 +7,11 @@ mkdir c:\jenkins
 & NetSh Advfirewall set allprofiles state off 
 $curlurl = 'https://dl.uxnr.de/build/curl/curl_winssl_msys2_mingw32_stc/curl-7.53.1/curl-7.53.1.zip'
 (New-Object -TypeName System.Net.WebClient).DownloadFile($curlurl,"C:\curl.zip")
+
 #Extracting Curl
 Add-Type -assembly "system.io.compression.filesystem"
 [io.compression.zipfile]::ExtractToDirectory("C:\curl.zip","C:\curl\")
+
 #Downloading & Installing JRE
 $jreurl = 'http://javadl.oracle.com/webapps/download/AutoDL?BundleId=225353_090f390dda5b47b9b721c7dfaa008135'
 $env:Path = $env:Path + ';' + "C:\curl\src"
