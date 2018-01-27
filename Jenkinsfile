@@ -13,4 +13,10 @@ node{
 	        echo 'Testing stage'
 	    '''
 	}
+	stage('cloud'){
+	    echo 'Testing aws-connection'
+	    sh '''
+	        aws ec2 describe-regions --region us-east-1
+	    '''
+	}
 }
