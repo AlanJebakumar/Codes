@@ -1,5 +1,6 @@
 node{
 	deleteDir()
+	checkout scm
 	
 	stage('Build'){
 		echo 'Build Step'
