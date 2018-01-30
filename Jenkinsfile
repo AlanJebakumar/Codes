@@ -29,6 +29,13 @@ pipeline{
 			choices: 'us-east-1'
 		)		
 	}
+	
+	environment{
+		ami_id = ""
+		subnets = ""
+		vpc_id = ""
+	}
+	
 
 	stages{
 		stage('Testing AWS Connection'){
@@ -43,7 +50,8 @@ pipeline{
 				'''				
 			}
 		}
-
+		
+		
 		stage('Finding param Values'){
 			agent{
 				label 'master'
@@ -57,6 +65,18 @@ pipeline{
 					subnets=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=${vpc_id}" --region ${Region}| jq '.Subnets[].SubnetId' -r | paste -d, -s -)
 				'''
 			}
+		}
+		
+		stage('Creating AWS Stack'){
+		    agent{
+		        label 'master'
+		    }
+		    steps{
+		        echo "Trying to list CFTemplates Dir"
+		        sh '''
+		            ls -al "${WORKSPACE}/CFTemplates/"
+		        '''
+		    }
 		}
 	}
 }
