@@ -27,7 +27,7 @@
       "Default": "TestNaren",
       "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
     },
-    "OsVersion": {
+    "OsAmi": {
       "Description": "Select the version of OS",
       "Type": "String"
     },
@@ -88,8 +88,7 @@
       ]
     }
   },
-  "Mappings": {
-  },
+  "Mappings": {},
   "Resources": {
     "Ec2ASG": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
@@ -433,7 +432,7 @@
           }
         ],
         "ImageId": {
-          "Ref": "OsVersion"
+          "Ref": "OsAmi"
         },
         "EbsOptimized": false,
         "SecurityGroups": [
