@@ -23,7 +23,7 @@ node{
 	stage('Getting workspace contents'){
 		echo "Listing ${workspace} contents"	
 		sh '''
-			ls -al ${workspace}
+			ls -al -r ${workspace}
 		'''
 	}
 }
