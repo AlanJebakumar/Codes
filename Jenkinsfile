@@ -16,8 +16,7 @@ pipeline{
 	parameters{
 		string(
 			name: 'StackName',
-			description: 'StackName',
-			defaultValue: 'stack01'
+			description: 'StackName'
 		)
 		choice(
 			name: 'OsVersion',
