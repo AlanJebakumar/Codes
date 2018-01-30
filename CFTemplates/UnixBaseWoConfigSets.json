@@ -163,22 +163,7 @@
                   "Effect": "Allow",
                   "Action": "ec2:*",
                   "Resource": [
-                    {
-                      "Fn::Join": [
-                        "",
-                        [
-                          "arn:aws:ec2:",
-                          {
-                            "Ref": "AWS::Region"
-                          },
-                          ":",
-                          {
-                            "Ref": "AWS::AccountId"
-                          },
-                          ":instance/*"
-                        ]
-                      ]
-                    }
+                    "*"
                   ]
                 }
               ]
@@ -287,12 +272,80 @@
                     "",
                     [
                       "#!/bin/bash -xe\n",
-                      "yum install jq\n"
+                      "yum install -y jq\n"
                     ]
                   ]
                 },
                 "mode": 500,
                 "owner": "root",
+                "group": "root"
+              },
+              "/etc/cfn/cfn-signal.sh": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#!/bin/bash -xe\n",
+                      "/opt/aws/bin/cfn-signal --success=true",
+                      " --stack=",
+                      {
+                        "Ref": "AWS::StackName"
+                      },
+                      " --region=",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      " '",
+                      {
+                        "Ref": "Ec2WaitHandle"
+                      },
+                      "'\n"
+                    ]
+                  ]
+                },
+                "mode": 500,
+                "owner": "root",
+                "group": "root"
+              },
+              "/etc/cfn/cfn-signal.py": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "import os\n",
+                      "#Calling cfn-signal\n",
+                      "os.system('/opt/aws/bin/cfn-signal --success=true --stack=",
+                      {
+                        "Ref": "AWS::StackName"
+                      },
+                      " --region=",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      " \"",
+                      {
+                        "Ref": "Ec2WaitHandle"
+                      },
+                      "\"')\n"
+                    ]
+                  ]
+                },
+                "mode": 500,
+                "user": "root",
+                "group": "root"
+              },
+              "/etc/cfn/pip-install-boto3.sh": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#!/bin/bash -xe\n",
+                      "pip install boto3 --verbose\n"
+                    ]
+                  ]
+                },
+                "mode": 500,
+                "user": "root",
                 "group": "root"
               }
             },
@@ -311,6 +364,14 @@
             "commands": {
               "1 - Install JQ": {
                 "command": "sh /etc/cfn/install-jq.sh",
+                "cwd": "~"
+              },
+              "2 - install boto3": {
+                "command": "sh /etc/cfn/pip-install-boto3.sh",
+                "cwd": "~"
+              },
+              "99 - Send cfn-signal": {
+                "command": "python -v /etc/cfn/cfn-signal.py",
                 "cwd": "~"
               }
             }
@@ -356,30 +417,16 @@
               [
                 "#!/bin/bash -xe\n",
                 "yum update -y aws-cfn-bootstrap\n",
-                "/opt/aws/bin/cfn-init -v ",
-                "         --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                "         --resource Ec2Instance ",
-                "         --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n",
-                "/opt/aws/bin/cfn-signal -e $?",
+                "/opt/aws/bin/cfn-init -v",
                 " --stack=",
                 {
                   "Ref": "AWS::StackName"
                 },
-                " --resource=Ec2Resource",
-                " \"",
+                " --resource Ec2Instance ",
+                " --region ",
                 {
-                  "Fn::Base64": {
-                    "Ref": "Ec2WaitHandle"
-                  }
+                  "Ref": "AWS::Region"
                 },
-                "\"",
                 "\n"
               ]
             ]

@@ -26,324 +26,12 @@
   },
   "Mappings": {
     "AWSInstanceType2Arch": {
-      "t1.micro": {
-        "Arch": "PV64"
-      },
       "t2.nano": {
-        "Arch": "HVM64"
-      },
-      "t2.micro": {
-        "Arch": "HVM64"
-      },
-      "t2.small": {
-        "Arch": "HVM64"
-      },
-      "t2.medium": {
-        "Arch": "HVM64"
-      },
-      "t2.large": {
-        "Arch": "HVM64"
-      },
-      "m1.small": {
-        "Arch": "PV64"
-      },
-      "m1.medium": {
-        "Arch": "PV64"
-      },
-      "m1.large": {
-        "Arch": "PV64"
-      },
-      "m1.xlarge": {
-        "Arch": "PV64"
-      },
-      "m2.xlarge": {
-        "Arch": "PV64"
-      },
-      "m2.2xlarge": {
-        "Arch": "PV64"
-      },
-      "m2.4xlarge": {
-        "Arch": "PV64"
-      },
-      "m3.medium": {
-        "Arch": "HVM64"
-      },
-      "m3.large": {
-        "Arch": "HVM64"
-      },
-      "m3.xlarge": {
-        "Arch": "HVM64"
-      },
-      "m3.2xlarge": {
-        "Arch": "HVM64"
-      },
-      "m4.large": {
-        "Arch": "HVM64"
-      },
-      "m4.xlarge": {
-        "Arch": "HVM64"
-      },
-      "m4.2xlarge": {
-        "Arch": "HVM64"
-      },
-      "m4.4xlarge": {
-        "Arch": "HVM64"
-      },
-      "m4.10xlarge": {
-        "Arch": "HVM64"
-      },
-      "c1.medium": {
-        "Arch": "PV64"
-      },
-      "c1.xlarge": {
-        "Arch": "PV64"
-      },
-      "c3.large": {
-        "Arch": "HVM64"
-      },
-      "c3.xlarge": {
-        "Arch": "HVM64"
-      },
-      "c3.2xlarge": {
-        "Arch": "HVM64"
-      },
-      "c3.4xlarge": {
-        "Arch": "HVM64"
-      },
-      "c3.8xlarge": {
-        "Arch": "HVM64"
-      },
-      "c4.large": {
-        "Arch": "HVM64"
-      },
-      "c4.xlarge": {
-        "Arch": "HVM64"
-      },
-      "c4.2xlarge": {
-        "Arch": "HVM64"
-      },
-      "c4.4xlarge": {
-        "Arch": "HVM64"
-      },
-      "c4.8xlarge": {
-        "Arch": "HVM64"
-      },
-      "g2.2xlarge": {
-        "Arch": "HVMG2"
-      },
-      "g2.8xlarge": {
-        "Arch": "HVMG2"
-      },
-      "r3.large": {
-        "Arch": "HVM64"
-      },
-      "r3.xlarge": {
-        "Arch": "HVM64"
-      },
-      "r3.2xlarge": {
-        "Arch": "HVM64"
-      },
-      "r3.4xlarge": {
-        "Arch": "HVM64"
-      },
-      "r3.8xlarge": {
-        "Arch": "HVM64"
-      },
-      "i2.xlarge": {
-        "Arch": "HVM64"
-      },
-      "i2.2xlarge": {
-        "Arch": "HVM64"
-      },
-      "i2.4xlarge": {
-        "Arch": "HVM64"
-      },
-      "i2.8xlarge": {
-        "Arch": "HVM64"
-      },
-      "d2.xlarge": {
-        "Arch": "HVM64"
-      },
-      "d2.2xlarge": {
-        "Arch": "HVM64"
-      },
-      "d2.4xlarge": {
-        "Arch": "HVM64"
-      },
-      "d2.8xlarge": {
-        "Arch": "HVM64"
-      },
-      "hi1.4xlarge": {
-        "Arch": "HVM64"
-      },
-      "hs1.8xlarge": {
-        "Arch": "HVM64"
-      },
-      "cr1.8xlarge": {
-        "Arch": "HVM64"
-      },
-      "cc2.8xlarge": {
         "Arch": "HVM64"
       }
     },
     "AWSInstanceType2NATArch": {
-      "t1.micro": {
-        "Arch": "NATPV64"
-      },
       "t2.nano": {
-        "Arch": "NATHVM64"
-      },
-      "t2.micro": {
-        "Arch": "NATHVM64"
-      },
-      "t2.small": {
-        "Arch": "NATHVM64"
-      },
-      "t2.medium": {
-        "Arch": "NATHVM64"
-      },
-      "t2.large": {
-        "Arch": "NATHVM64"
-      },
-      "m1.small": {
-        "Arch": "NATPV64"
-      },
-      "m1.medium": {
-        "Arch": "NATPV64"
-      },
-      "m1.large": {
-        "Arch": "NATPV64"
-      },
-      "m1.xlarge": {
-        "Arch": "NATPV64"
-      },
-      "m2.xlarge": {
-        "Arch": "NATPV64"
-      },
-      "m2.2xlarge": {
-        "Arch": "NATPV64"
-      },
-      "m2.4xlarge": {
-        "Arch": "NATPV64"
-      },
-      "m3.medium": {
-        "Arch": "NATHVM64"
-      },
-      "m3.large": {
-        "Arch": "NATHVM64"
-      },
-      "m3.xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "m3.2xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "m4.large": {
-        "Arch": "NATHVM64"
-      },
-      "m4.xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "m4.2xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "m4.4xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "m4.10xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "c1.medium": {
-        "Arch": "NATPV64"
-      },
-      "c1.xlarge": {
-        "Arch": "NATPV64"
-      },
-      "c3.large": {
-        "Arch": "NATHVM64"
-      },
-      "c3.xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "c3.2xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "c3.4xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "c3.8xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "c4.large": {
-        "Arch": "NATHVM64"
-      },
-      "c4.xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "c4.2xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "c4.4xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "c4.8xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "g2.2xlarge": {
-        "Arch": "NATHVMG2"
-      },
-      "g2.8xlarge": {
-        "Arch": "NATHVMG2"
-      },
-      "r3.large": {
-        "Arch": "NATHVM64"
-      },
-      "r3.xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "r3.2xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "r3.4xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "r3.8xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "i2.xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "i2.2xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "i2.4xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "i2.8xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "d2.xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "d2.2xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "d2.4xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "d2.8xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "hi1.4xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "hs1.8xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "cr1.8xlarge": {
-        "Arch": "NATHVM64"
-      },
-      "cc2.8xlarge": {
         "Arch": "NATHVM64"
       }
     },
@@ -431,7 +119,7 @@
     }
   },
   "Resources": {
-    "WebServerSecurityGroup": {
+    "Ec2SG": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupDescription": "Enable HTTP access via port 80 locked down to the load balancer + SSH access",
@@ -453,7 +141,7 @@
         ]
       }
     },
-    "WebServer": {
+    "Ec2Instance": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
         "AWS::CloudFormation::Init": {
@@ -492,13 +180,13 @@
                     [
                       "[cfn-auto-reloader-hook]\n",
                       "triggers=post.update\n",
-                      "path=Resources.WebServer.Metadata.AWS::CloudFormation::Init\n",
+                      "path=Resources.Ec2Instance.Metadata.AWS::CloudFormation::Init\n",
                       "action=/opt/aws/bin/cfn-init -v ",
                       "         --stack ",
                       {
                         "Ref": "AWS::StackName"
                       },
-                      "         --resource WebServer ",
+                      "         --resource Ec2Instance ",
                       "         --configsets wordpress_install ",
                       "         --region ",
                       {
@@ -551,7 +239,7 @@
         },
         "SecurityGroups": [
           {
-            "Ref": "WebServerSecurityGroup"
+            "Ref": "Ec2SG"
           }
         ],
         "KeyName": {
@@ -569,7 +257,7 @@
                 {
                   "Ref": "AWS::StackName"
                 },
-                "         --resource WebServer ",
+                "         --resource Ec2Instance ",
                 "         --region ",
                 {
                   "Ref": "AWS::Region"
@@ -594,7 +282,7 @@
     },
     "Ec2WaitCondition": {
       "Type": "AWS::CloudFormation::WaitCondition",
-      "DependsOn": "WebServer",
+      "DependsOn": "Ec2Instance",
       "Properties": {
         "Handle": {
           "Ref": "Ec2WaitHandle"

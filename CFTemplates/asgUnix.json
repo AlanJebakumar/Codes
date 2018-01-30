@@ -1,0 +1,610 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Sample ASG Template",
+  "Parameters": {
+    "EnableLB": {
+      "Type": "String",
+      "Description": "True/False to enable LoadBalancer",
+      "AllowedValues": [
+        true,
+        false
+      ],
+      "Default": false
+    },
+    "InstanceType": {
+      "Description": "EC2 instance type",
+      "Type": "String",
+      "Default": "t2.nano",
+      "AllowedValues": [
+        "t2.nano",
+        "t2.micro"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    },
+    "KeyName": {
+      "Description": "The EC2 Key Pair to allow SSH access to the instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Default": "TestNaren",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "OsVersion": {
+      "Description": "Select the version of OS",
+      "Type": "String",
+      "AllowedValues": [
+        "AmazonLinux"
+      ],
+      "Default": "AmazonLinux"
+    },
+    "SSHLocation": {
+      "Description": "The IP address range that can be used to SSH to the EC2 instances",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    },
+    "Subnets": {
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "Description": "The list of SubnetIds in your Virtual Private Cloud (VPC)",
+      "ConstraintDescription": "must be a list of at least two existing subnets associated with at least two different availability zones. They should be residing in the selected Virtual Private Cloud."
+    },
+    "RootDiskSize": {
+      "Description": "Drive Size of Volume C",
+      "Type": "Number",
+      "Default": 10
+    },
+    "VolDRequired": {
+      "Description": "True/False for VolD Required",
+      "Type": "String",
+      "AllowedValues": [
+        true,
+        false
+      ],
+      "Default": false
+    },
+    "VolDSize": {
+      "Description": "Drive Size of Volume D",
+      "Type": "Number",
+      "Default": 5
+    },
+    "VpcId": {
+      "Type": "AWS::EC2::VPC::Id",
+      "Description": "VpcId of your existing Virtual Private Cloud (VPC)",
+      "ConstraintDescription": "must be the VPC Id of an existing Virtual Private Cloud."
+    }
+  },
+  "Conditions": {
+    "LBProvided": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnableLB"
+        },
+        true
+      ]
+    },
+    "VolDRequiredProvided": {
+      "Fn::Equals": [
+        {
+          "Ref": "VolDRequired"
+        },
+        true
+      ]
+    }
+  },
+  "Mappings": {
+    "AWSRegion2AMI": {
+      "us-east-1": {
+        "AmazonLinux": "ami-55ef662f"
+      }
+    }
+  },
+  "Resources": {
+    "Ec2ASG": {
+      "Type": "AWS::AutoScaling::AutoScalingGroup",
+      "DependsOn": [
+        "Ec2LC"
+      ],
+      "Properties": {
+        "TargetGroupARNs": [
+          {
+            "Fn::If": [
+              "LBProvided",
+              {
+                "Ref": "Ec2TG"
+              },
+              {
+                "Ref": "AWS::NoValue"
+              }
+            ]
+          }
+        ],
+        "VPCZoneIdentifier": {
+          "Ref": "Subnets"
+        },
+        "LaunchConfigurationName": {
+          "Ref": "Ec2LC"
+        },
+        "MinSize": 0,
+        "MaxSize": 2,
+        "DesiredCapacity": 1,
+        "HealthCheckGracePeriod": 240
+      }
+    },
+    "Ec2IP": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "DependsOn": [
+        "Ec2SG"
+      ],
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "Ec2IamRole"
+          }
+        ]
+      }
+    },
+    "Ec2IamRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "Ec2FullAccess",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "ec2:Describe*",
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "S3Access",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "s3:*",
+                  "Resource": [
+                    "arn:aws:s3:::devopslab-cts",
+                    "arn:aws:s3:::devopslab-cts/*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "DiscoveryPolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ec2:Describe*",
+                    "cloudformation:Describe*",
+                    "autoscaling:Describe*"
+                  ],
+                  "Resource": [
+                    "*"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Ec2LC": {
+      "Type": "AWS::AutoScaling::LaunchConfiguration",
+      "DependsOn": [
+        "Ec2SG"
+      ],
+      "Metadata": {
+        "AWS::Cloudformation::Authentication": {
+          "S3Creds": {
+            "type": "s3",
+            "rolename": "Ec2IamRole",
+            "buckets": [
+              "devopslab-cts/Scripts/*"
+            ]
+          }
+        },
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "files": {
+              "/etc/cfn/cfn-hup.conf": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "[main]\n",
+                      "stack=",
+                      {
+                        "Ref": "AWS::StackId"
+                      },
+                      "\n",
+                      "region=",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "\n"
+                    ]
+                  ]
+                },
+                "mode": "000400",
+                "owner": "root",
+                "group": "root"
+              },
+              "/etc/cfn/hooks.d/cfn-auto-reloader.conf": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "[cfn-auto-reloader-hook]\n",
+                      "triggers=post.update\n",
+                      "path=Resources.WebServer.Metadata.AWS::CloudFormation::Init\n",
+                      "action=/opt/aws/bin/cfn-init -v ",
+                      "         --stack ",
+                      {
+                        "Ref": "AWS::StackName"
+                      },
+                      "         --resource WebServer ",
+                      "         --configsets wordpress_install ",
+                      "         --region ",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "\n"
+                    ]
+                  ]
+                },
+                "mode": "000400",
+                "owner": "root",
+                "group": "root"
+              },
+              "/etc/cfn/install-jq.sh": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#!/bin/bash -xe\n",
+                      "yum install -y jq\n"
+                    ]
+                  ]
+                },
+                "mode": 500,
+                "owner": "root",
+                "group": "root"
+              },
+              "/etc/cfn/cfn-signal.sh": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#!/bin/bash -xe\n",
+                      "echo -e \"Executing $(basename $0)\"\n",
+                      "stack_status=$(/usr/bin/aws cloudformation describe-stacks --stack-name ",
+                      {
+                        "Ref": "AWS::StackName"
+                      },
+                      " --region=",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      " | /usr/bin/jq '.Stacks[].StackStatus' -r)\n",
+                      "if [ ${stack_status} != \"CREATE_COMPLETE\" ]; then\n",
+                      "\t/usr/bin/python /etc/cfn/cfn-signal.py\n",
+                      "else\n",
+                      "\techo -e \"Stack is already completed\"\n",
+                      "fi"
+                    ]
+                  ]
+                },
+                "mode": 500,
+                "owner": "root",
+                "group": "root"
+              },
+              "/etc/cfn/cfn-signal.py": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "import boto3\n",
+                      "import os\n",
+                      "cf = boto3.client('cloudformation',region_name='",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      "')\n",
+                      "resp = cf.describe_stacks(StackName='",
+                      {
+                        "Ref": "AWS::StackName"
+                      },
+                      "').get('Stacks')\n",
+                      "stack_status = resp[0]['StackStatus']\n",
+                      "if (stack_status == 'CREATE_COMPLETE'):\n",
+                      "\tprint('Stack is complete')\n",
+                      "else:\n",
+                      "\tprint('Signalling now')\n",
+                      "\tos.system('/opt/aws/bin/cfn-signal --success=true --stack=",
+                      {
+                        "Ref": "AWS::StackName"
+                      },
+                      " --region=",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      " \"",
+                      {
+                        "Ref": "Ec2WaitHandle"
+                      },
+                      "\"",
+                      "')\n"
+                    ]
+                  ]
+                },
+                "mode": 500,
+                "user": "root",
+                "group": "root"
+              },
+              "/etc/cfn/pip-install-boto3.sh": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#!/bin/bash -xe\n",
+                      "pip install boto3 --verbose\n"
+                    ]
+                  ]
+                },
+                "mode": 500,
+                "user": "root",
+                "group": "root"
+              }
+            },
+            "services": {
+              "sysvinit": {
+                "cfn-hup": {
+                  "enabled": "true",
+                  "ensureRunning": "true",
+                  "files": [
+                    "/etc/cfn/cfn-hup.conf",
+                    "/etc/cfn/hooks.d/cfn-auto-reloader.conf"
+                  ]
+                }
+              }
+            },
+            "commands": {
+              "1 - Install JQ": {
+                "command": "/bin/sh /etc/cfn/install-jq.sh",
+                "cwd": "~"
+              },
+              "2 - install boto3": {
+                "command": "/bin/sh /etc/cfn/pip-install-boto3.sh",
+                "cwd": "~"
+              },
+              "99 - Send cfn-signal": {
+                "command": "/bin/sh /etc/cfn/cfn-signal.sh",
+                "cwd": "~"
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/xvda",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeSize": {
+                "Ref": "RootDiskSize"
+              },
+              "VolumeType": "standard"
+            }
+          }
+        ],
+        "IamInstanceProfile": {
+          "Ref": "Ec2IP"
+        },
+        "AssociatePublicIpAddress": true,
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "AWSRegion2AMI",
+            {
+              "Ref": "AWS::Region"
+            },
+            {
+              "Ref": "OsVersion"
+            }
+          ]
+        },
+        "EbsOptimized": false,
+        "SecurityGroups": [
+          {
+            "Ref": "Ec2SG"
+          }
+        ],
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "InstanceMonitoring": false,
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -xe\n",
+                "yum update -y aws-cfn-bootstrap\n",
+                "/opt/aws/bin/cfn-init -v",
+                " --stack=",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --resource Ec2LC",
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "Ec2LoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Condition": "LBProvided",
+      "DependsOn": [
+        "Ec2LC"
+      ],
+      "Properties": {
+        "Scheme": "internet-facing",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ],
+        "Type": "network",
+        "Subnets": {
+          "Ref": "Subnets"
+        },
+        "IpAddressType": "ipv4"
+      }
+    },
+    "Ec2SG": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable SSH access and HTTP from the load balancer only",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            },
+            "Description": "RDP"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "80",
+            "ToPort": "80",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            },
+            "Description": "HTTP"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "5985",
+            "ToPort": "5985",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            },
+            "Description": "WinRM-HTTP"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "5986",
+            "ToPort": "5986",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            },
+            "Description": "WinRM-HTTPS"
+          }
+        ],
+        "VpcId": {
+          "Ref": "VpcId"
+        }
+      }
+    },
+    "Ec2TG": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Condition": "LBProvided",
+      "DependsOn": [
+        "Ec2LC"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckTimeoutSeconds": 10,
+        "HealthyThresholdCount": 5,
+        "Port": 80,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 5,
+        "VpcId": {
+          "Ref": "VpcId"
+        }
+      }
+    },
+    "Ec2WaitCondition": {
+      "Type": "AWS::CloudFormation::WaitCondition",
+      "DependsOn": "Ec2SG",
+      "Properties": {
+        "Handle": {
+          "Ref": "Ec2WaitHandle"
+        },
+        "Timeout": "2700",
+        "Count": 1
+      }
+    },
+    "Ec2WaitHandle": {
+      "Type": "AWS::CloudFormation::WaitConditionHandle"
+    },
+    "LBListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Condition": "LBProvided",
+      "DependsOn": [
+        "Ec2LC"
+      ],
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Ec2TG"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Ec2LoadBalancer"
+        },
+        "Port": "80",
+        "Protocol": "TCP"
+      }
+    }
+  },
+  "Outputs": {}
+}

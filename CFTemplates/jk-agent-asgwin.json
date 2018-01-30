@@ -2,6 +2,14 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Sample ASG Template",
   "Parameters": {
+    "JnlpURL": {
+      "Type": "String",
+      "Description": "JNLP-URL"
+    },
+    "Secret": {
+      "Type": "String",
+      "Description": "JK Secret"
+    },
     "EnableLB": {
       "Type": "String",
       "Description": "True/False to enable LoadBalancer",
@@ -12,7 +20,7 @@
       "Default": false
     },
     "InstanceType": {
-      "Description": "WebServer EC2 instance type",
+      "Description": "EC2 instance type",
       "Type": "String",
       "Default": "t2.nano",
       "AllowedValues": [
@@ -29,12 +37,7 @@
     },
     "OsVersion": {
       "Description": "Select the version of OS",
-      "Type": "String",
-      "AllowedValues": [
-        "Windows2008r2",
-        "Windows2012r2"
-      ],
-      "Default": "Windows2008r2"
+      "Type": "String"
     },
     "SSHLocation": {
       "Description": "The IP address range that can be used to SSH to the EC2 instances",
@@ -94,12 +97,6 @@
     }
   },
   "Mappings": {
-    "AWSRegion2AMI": {
-      "us-east-1": {
-        "Windows2008r2": "ami-de9e91c8",
-        "Windows2012r2": "ami-c6e9d9bd"
-      }
-    }
   },
   "Resources": {
     "Ec2ASG": {
@@ -127,8 +124,10 @@
         "LaunchConfigurationName": {
           "Ref": "Ec2LC"
         },
-        "MinSize": "1",
-        "MaxSize": "1"
+        "MinSize": 0,
+        "MaxSize": 2,
+        "DesiredCapacity": 1,
+        "HealthCheckGracePeriod": 240
       }
     },
     "Ec2IP": {
@@ -174,7 +173,25 @@
                 {
                   "Effect": "Allow",
                   "Action": "ec2:*",
-                  "Resource": "*"
+                  "Resource": [
+                    "arn:aws:ec2:us-east-1:336361235864:instance/*"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "S3Access",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "s3:*",
+                  "Resource": [
+                    "arn:aws:s3:::devopslab-cts",
+                    "arn:aws:s3:::devopslab-cts/*"
+                  ]
                 }
               ]
             }
@@ -188,13 +205,16 @@
         "Ec2SG"
       ],
       "Metadata": {
-        "AWS::CloudFormation::Init": {
-          "configSets": {
-            "default": [
-              "config",
-              "AppSetup"
+        "AWS::Cloudformation::Authentication": {
+          "S3Creds": {
+            "type": "s3",
+            "rolename": "Ec2IamRole",
+            "buckets": [
+              "devopslab-cts/Scripts/*"
             ]
-          },
+          }
+        },
+        "AWS::CloudFormation::Init": {
           "config": {
             "files": {
               "c:\\cfn\\cfn-hup.conf": {
@@ -253,6 +273,32 @@
                   ]
                 }
               },
+              "C:\\cfn\\ps\\Prep.ps1": {
+                "source": "https://s3.amazonaws.com/devopslab-cts/Scripts/Prep.ps1"
+              },
+              "C:\\cfn\\ps\\Prep-WinRM.ps1": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "#Turn Off Firewall for all profiles\n",
+                      "& NetSh Advfirewall set allprofiles state off\n",
+                      "#Adding HTTP Transport for winrm\n",
+                      "& winrm create winrm/config/listener?Address=*+Transport=HTTP\n",
+                      "#Enabling winrm on http traffic\n",
+                      "& winrm quickconfig -transport:http -force\n",
+                      "#Retreive winrm Identity\n",
+                      "& winrm id\n",
+                      "#Setting basic auth of \"winrm/config/client/auth\" to true\n",
+                      "& winrm set winrm/config/client/auth '@{Basic=\"true\"}'\n",
+                      "#Setting service/auth to true\n",
+                      "& winrm set winrm/config/service/auth '@{Basic=\"true\"}'\n",
+                      "#Setting config/service to true\n",
+                      "& winrm set winrm/config/service '@{AllowUnencrypted=\"true\"}'\n"
+                    ]
+                  ]
+                }
+              },
               "C:\\cfn\\ps\\Rename.ps1": {
                 "content": {
                   "Fn::Join": [
@@ -270,6 +316,17 @@
                   ]
                 }
               },
+              "C:\\cfn\\ps\\AppInstall.ps1": {
+                "content": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "$deploypath = $Env:temp\\Deploypath\n",
+                      "New-item -path $deploypath -itemType Directory -force -verbose\n"
+                    ]
+                  ]
+                }
+              },
               "C:\\cfn\\ps\\Install_IIS.ps1": {
                 "content": {
                   "Fn::Join": [
@@ -282,7 +339,22 @@
                       "Add-WindowsFeature -Name web-common-http,web-mgmt-console -IncludeAllSubFeature -Verbose -Restart\n",
                       "#Adding new SampleSite Directory\n",
                       "New-item -path C:\\SampleSite2 -ItemType Directory -Force -verbose\n",
-                      "$html_Content = \"<html><head><title>$env:Computername</title></head><h2>Sample Site2 surving from $env:Computername at $(Invoke-RestMethod -Uri 'http://169.254.169.254/latest/meta-data/local-ipv4/')</h2> </html>\" | out-file -FilePath C:\\SampleSite2\\index.htm -Force -Verbose -Encoding utf8\n",
+                      "\"<html>\n",
+                      "<head>\n",
+                      "<script type=\"\"text/JavaScript\"\">\n",
+                      " <!--\n",
+                      " function AutoRefresh(t){\n",
+                      "   setTimeOut(\"\"location.reload(true);\"\",t)\n",
+                      " }\n",
+                      " -->\n",
+                      "</script>\n",
+                      "</head>\n",
+                      "<body onload=\"\"JavaScript:AutoRefresh(5000);\"\"\n",
+                      "<h2>Sample Site2 serving from $env:Computername at $(Invoke-RestMethod -Uri 'http://169.254.169.254/latest/meta-data/local-ipv4/')</h2>\n",
+                      "Refreshing every 5 secs\n",
+                      "</body>\n",
+                      "</html>\" | out-file -FilePath C:\\SampleSite2\\index.htm -Force -Verbose -Encoding utf8\n",
+                      "& setx /m path \"$env:Path;C:\\Windows\\system32\\inetsrv\"\n",
                       "$env:path += ';' + 'C:\\Windows\\system32\\inetsrv'\n",
                       "& cmd.exe /c \"appcmd.exe add app /site.name:\"\"Default Web Site\"\" /path:\"\"/samplesite2\"\" /physicalPath:\"\"C:\\Samplesite2\"\"\"\n"
                     ]
@@ -301,9 +373,7 @@
                   ]
                 }
               }
-            }
-          },
-          "AppSetup": {
+            },
             "commands": {
               "1 - Rename Computer": {
                 "command": "powershell -file c:\\cfn\\ps\\Rename.ps1"
@@ -313,7 +383,17 @@
                 "waitAfterCompletion": "forever"
               },
               "3 - Install IIS and Create Samplesite": {
-                "command": "powershell -file C:\\cfn\\ps\\Install_IIS.ps1"
+                "command": "rem powershell -file C:\\cfn\\ps\\Install_IIS.ps1"
+              },
+              "4 - Prep-WinRM": {
+                "command": "powershell -file C:\\cfn\\ps\\Prep-WinRM.ps1"
+              },
+              "5 - PrepInstance": {
+                "command": "powershell -file C:\\cfn\\ps\\Prep.ps1"
+              },
+              "6 - Reboot post Prep": {
+                "command": "c:\\windows\\system32\\shutdown -r -f",
+                "waitafterCompletion": "forever"
               },
               "99-signal-success": {
                 "command": "powershell -file C:\\cfn\\ps\\cfn-signal.ps1"
@@ -361,15 +441,7 @@
           }
         ],
         "ImageId": {
-          "Fn::FindInMap": [
-            "AWSRegion2AMI",
-            {
-              "Ref": "AWS::Region"
-            },
-            {
-              "Ref": "OsVersion"
-            }
-          ]
+          "Ref": "OsVersion"
         },
         "EbsOptimized": false,
         "SecurityGroups": [
@@ -406,9 +478,7 @@
     },
     "Ec2LoadBalancer": {
       "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-      "Condition": [
-        "LBProvided"
-      ],
+      "Condition": "LBProvided",
       "DependsOn": [
         "Ec2LC"
       ],
@@ -451,6 +521,24 @@
               "Ref": "SSHLocation"
             },
             "Description": "HTTP"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "5985",
+            "ToPort": "5985",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            },
+            "Description": "WinRM-HTTP"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "5986",
+            "ToPort": "5986",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            },
+            "Description": "WinRM-HTTPS"
           }
         ],
         "VpcId": {
@@ -460,9 +548,7 @@
     },
     "Ec2TG": {
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "Condition": [
-        "LBProvided"
-      ],
+      "Condition": "LBProvided",
       "DependsOn": [
         "Ec2LC"
       ],
@@ -485,7 +571,7 @@
         "Handle": {
           "Ref": "Ec2WaitHandle"
         },
-        "Timeout": "2700",
+        "Timeout": "3600",
         "Count": 1
       }
     },
@@ -494,9 +580,7 @@
     },
     "LBListener": {
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Condition": [
-        "LBProvided"
-      ],
+      "Condition": "LBProvided",
       "DependsOn": [
         "Ec2LC"
       ],
