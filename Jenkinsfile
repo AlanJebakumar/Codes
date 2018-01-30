@@ -1,4 +1,5 @@
-node{
+pipeline{
+	agent label: "master"
 	deleteDir()
 	checkout scm
 	
