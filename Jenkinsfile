@@ -44,7 +44,7 @@ pipeline{
 			}
 
 			steps{
-		    echo "Testing AWS Connection"
+				echo "Testing AWS Connection"
 				sh '''
 					aws ec2 describe-regions --region ${Region}
 				'''				
