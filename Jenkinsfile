@@ -19,4 +19,10 @@ node{
 	        aws ec2 describe-regions --region us-east-1
 	    '''
 	}
+	stage('Getting workspace contents'){
+		echo "Listing ${workspace} contents"	
+		sh '''
+			ls -al ${workspace}
+		'''
+	}
 }
