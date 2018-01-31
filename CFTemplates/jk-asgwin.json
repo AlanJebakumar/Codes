@@ -374,13 +374,13 @@
                 "waitAfterCompletion": "forever"
               },
               "3 - Install IIS and Create Samplesite": {
-                "command": "rem powershell -file C:\\cfn\\ps\\Install_IIS.ps1"
+                "command": "powershell -file C:\\cfn\\ps\\Install_IIS.ps1"
               },
               "4 - Prep-WinRM": {
                 "command": "powershell -file C:\\cfn\\ps\\Prep-WinRM.ps1"
               },
               "5 - PrepInstance": {
-                "command": "powershell -file C:\\cfn\\ps\\Prep.ps1"
+                "command": "rem powershell -file C:\\cfn\\ps\\Prep.ps1"
               },
               "6 - Reboot post Prep": {
                 "command": "c:\\windows\\system32\\shutdown -r -f",
